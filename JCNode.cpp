@@ -8,7 +8,7 @@ JCNode::JCNode()
 
 }
 
-JCNode::JCNode(JCString const str)
+JCNode::JCNode(const JCString str)
 {
 	this->data = str;
 	this->next = nullptr;

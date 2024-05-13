@@ -40,8 +40,8 @@ ostream& operator<<(ostream& inputStrm, const DoubleLinkedList& dll)
 	// While there is a node to write out, as in not nullptr
 	while (current)
 	{
-		inputStrm << current->data;//write out the current data
-		current = current->next;//move to the next and try to repeat until nullptr
+		inputStrm << current->data << "\n";//write out the current data
+		current = current->prev;//move to the next and try to repeat until nullptr
 	}
 
 	return inputStrm;//return input stream for chaining
@@ -53,13 +53,15 @@ DoubleLinkedList::~DoubleLinkedList()
 	cout << "in linkedlist destructor" << endl;
 
 	// Changing to "current" for clarity
-	JCNode* current = head;
-	// While there are nodes to delete
-	while (head) 
+	JCNode* current = this->head; // creat pointer to head
+	JCNode* holdNext = nullptr; // pointer to hold memory address 
+
+	// While there are nodes to delete, nullptr being the last
+	while (current != nullptr) 
 	{
-		JCNode* next = current->next;// save the next node
-		delete current;// delete the present node
-		current = next; // next next node becomes current, repeat
+		holdNext = current->next ;// use hold,thru current to SAVE the next node
+		delete current;// Delete the present node
+		current = holdNext ; // next next node becomes current, repeat
 	}
 	// Set to nullptr when done	
 	head = nullptr;
@@ -78,7 +80,8 @@ int DoubleLinkedList::getCount() const
 
 JCString DoubleLinkedList::next() const
 {
-	JCNode* nowPtr = this->it;
+	JCNode* nowPtr = new JCNode();
+	nowPtr	= this->it;
 	this->it = this->head->next;
 
 	return nowPtr->data;
@@ -89,9 +92,31 @@ bool DoubleLinkedList::hasMore() const
 }
 bool DoubleLinkedList::insert(const JCString& str)
 {
-	JCNode* newNode(str);
-	this->head = newNode;
-	return false;
+	cout << "here is the insert func" << endl;
+
+	//create new node
+	JCNode* newNode =  new JCNode(str); 
+
+	if (this->count == 0)
+	{
+		this->head = newNode;
+		this->tail = newNode;
+		newNode->next = nullptr;
+		newNode->prev = nullptr;
+		++this->count;
+
+		return true;
+
+	}
+	else 
+	{
+		this->head->next = newNode;//old head's 'next' points to new head node
+		newNode->prev = this->head; // New head node's previous points to old head node;
+		this->head = newNode;//place on top of stack
+		 
+		++this->count;
+	}
+	return true;
 }
 bool DoubleLinkedList::remove(const JCString& str)
 {

@@ -12,8 +12,7 @@ public:
 	JCNode* head;
 	JCNode* tail;
 	mutable JCNode* it;
-	int count;
-	JCString data;
+	int count = 0;
 
 
 	DoubleLinkedList(); // default

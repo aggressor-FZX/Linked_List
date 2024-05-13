@@ -7,7 +7,7 @@ class JCNode
 {
 public:
 	JCNode();
-	JCNode(JCString const str);
+	JCNode(const JCString str);
 	JCString data;
 	JCNode* next;
 	JCNode* prev;
