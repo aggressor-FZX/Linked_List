@@ -90,19 +90,13 @@ bool DoubleLinkedList::hasMore() const
 {
 	return false;
 }
-bool DoubleLinkedList::insert(const JCString& str)
+bool DoubleLinkedList::push_back(const JCString& str)
 {
-	cout << "here is the insert func" << endl;
-
 	//create new node
-	JCNode* newNode =  new JCNode(str); 
 
 	if (this->count == 0)
 	{
-		this->head = newNode;
-		this->tail = newNode;
-		newNode->next = nullptr;
-		newNode->prev = nullptr;
+		this->initHeadNode(str);
 		++this->count;
 
 		return true;
@@ -110,6 +104,7 @@ bool DoubleLinkedList::insert(const JCString& str)
 	}
 	else 
 	{
+		JCNode* newNode =  new JCNode(str); 
 		this->head->next = newNode;//old head's 'next' points to new head node
 		newNode->prev = this->head; // New head node's previous points to old head node;
 		this->head = newNode;//place on top of stack
@@ -121,4 +116,21 @@ bool DoubleLinkedList::insert(const JCString& str)
 bool DoubleLinkedList::remove(const JCString& str)
 {
 	return false;
+}
+bool DoubleLinkedList::insert(const JCString& str)
+{
+	//create new node
+	JCNode* newNode =  new JCNode(str); 
+	//compare 
+
+	
+}
+void DoubleLinkedList::initHeadNode(const JCString& str)
+{
+	JCNode* newNode =  new JCNode(str); 
+	this->head = newNode;
+	this->tail = newNode;
+	newNode->next = nullptr;
+	newNode->prev = nullptr;
+
 }

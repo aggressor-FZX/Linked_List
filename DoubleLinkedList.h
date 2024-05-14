@@ -19,6 +19,7 @@ public:
 	~DoubleLinkedList(); // destructor
 
 	DoubleLinkedList(const DoubleLinkedList& dll);// copy constructor
+	bool push_back(const JCString& str);
 	bool insert(const JCString& str);
 	bool remove(const JCString& str);
 	int getCount() const;
@@ -31,7 +32,7 @@ private:
 	void resetIteration() const;
 	JCString next() const;
 	bool hasMore() const;
-
+	void initHeadNode(const JCString& str); 
 
 };
 

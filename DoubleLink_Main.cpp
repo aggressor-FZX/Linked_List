@@ -14,11 +14,11 @@ int main()
 	JCString jcstr4("Cruel");
 	JCString jcstr5("World");
 
-	dll.insert(jcstr1);
-	dll.insert(jcstr2);
-	dll.insert(jcstr3);
-	dll.insert(jcstr4);
-	dll.insert(jcstr5);
+	dll.push_back(jcstr1);
+	dll.push_back(jcstr2);
+	dll.push_back(jcstr3);
+	dll.push_back(jcstr4);
+	dll.push_back(jcstr5);
 
 	cout << dll << endl;
 
