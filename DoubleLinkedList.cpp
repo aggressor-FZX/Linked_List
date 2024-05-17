@@ -78,18 +78,6 @@ int DoubleLinkedList::getCount() const
 	return this->count;
 }
 
-JCString DoubleLinkedList::next() const
-{
-	JCNode* nowPtr = new JCNode();
-	nowPtr	= this->it;
-	this->it = this->head->next;
-
-	return nowPtr->data;
- }
-bool DoubleLinkedList::hasMore() const
-{
-	return false;
-}
 bool DoubleLinkedList::push_back(const JCString& str)
 {
 
@@ -218,9 +206,23 @@ bool DoubleLinkedList::insert(const JCString& str)
 	return success;
 	
 }
+
+bool DoubleLinkedList::hasMore() const
+{
+	bool isNull = false;
+	if ( this->it != nullptr)
+	{  
+		isNull = true;
+	}
+	return isNull;
+}
+
 JCString DoubleLinkedList::next() const
 {
-	return 0;
+	JCString itString = this->it->data; // copy string
+	this->it = this->it->prev; // move iter down the list
+
+	return itString;
 }
 void DoubleLinkedList::testValues() const
 {
