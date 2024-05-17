@@ -2,6 +2,9 @@
 #include <iostream>
 using std::cout;
 using std::endl;
+//Helper functions
+bool isLargerAlpha(const JCString& listString, const JCString& newString);
+JCNode* seeker(const char* str, const DoubleLinkedList* dll);
 
 DoubleLinkedList::DoubleLinkedList()
 {
@@ -125,37 +128,36 @@ bool DoubleLinkedList::insert(const JCString& str)
 	if (this->count == 0)
 	{
 		this->initHeadNode(str);
-
-		cout << "fist item" << endl;
 		success = true;
 		
-	}// Case where this is only one item in list
+	}
+	// Case where this is only one item in list
 	else if(this->count == 1)
 	{
-		cout << "second item" << endl;
-		
 		if (this->head->data == str.c_str())//using JCString to string compare operator
 		{
 			// Already in list, return false
-			success = false;
+			 return false;
 		}
-		else if (this->head->data > str )// Arg String comes before 
+		else
 		{
-			//string arg becomes new head
-			// call push back to handle it and increment this->count
-			success = this->push_back(str);
-		}
-		else if (this->it->data < str) // Arg String goes under first
-		{
-			this->pop_back(str);
-
-			success = true;
+			success  = isLargerAlpha(this->head->data, str);
+			if (success)
+			{
+				this->push_back(str);
+			}
+			else 
+			{
+				this->pop_back(str);
+				success = true;
+			}
 		}
 	}
-	else if(this->count > 1) // Case where there are already many entries
-	{	// Fist check the head
+	// Case where there are already many entries
+	else if(this->count > 1) 
+	{	// Fist check the head which must be handled separately
 
-		JCString listString = this->next();//head node
+		JCString listString = this->next();//examine head node
 
 		if (listString == str.c_str())//using JCString to string compare operator
 		{
@@ -163,29 +165,26 @@ bool DoubleLinkedList::insert(const JCString& str)
 		}
 		else if( listString > str)
 		{
-			success = this->push_back(str);
+			success = this->push_back(str);//string becomes new head node
 		}
 		else
-		{	//advance to next entrie
-
+		{	//advance to next entry
 			do
 			{
 				listString = this->next();
 
-				if (listString == str.c_str())//using JCString to string compare operator
+				if (listString == str.c_str())// use JCString to string compare operator
 				{
 					// Already in list, return false
 					cout << "in the list" << endl;
-					return false;
-					// RETURN FALSE
+					success = true;
+					this->it = nullptr;// end search
 				}
 				else if (listString > str)  // Arg String comes before
 				{
-					//cout << "insert " << str << " before " << this->it->data.c_str() << endl;
-
 					this->insertBefore(this->it, str);//increments and adds to the list
 					success = true;
-					break;
+					this->it = nullptr;//end search
 				}
 			} while (this->hasMore());
 
@@ -194,16 +193,13 @@ bool DoubleLinkedList::insert(const JCString& str)
 			{
 				this->pop_back(str);
 				success = true;
-
 			}
 		}
 	}
 
 	this->resetIteration();
 	//this->testValues();
-
 	return success;
-	
 }
 
 bool DoubleLinkedList::hasMore() const
@@ -293,4 +289,22 @@ JCNode* seeker(const char* str, const DoubleLinkedList* dll)
 	}
 
 	return nullptr; //didn't find it return null
+}
+bool isLargerAlpha(const JCString& listString, const JCString& newString)
+{
+	bool comesBefore = false;
+	
+	if(listString > newString )// Arg String comes before 
+	{
+		//string arg becomes new head
+		comesBefore = true;
+		// call push back to handle it and increment this->count
+	}
+	else if (listString < newString) // Arg String goes under first
+	{
+		comesBefore =false;
+	}
+
+	return comesBefore;
+
 }
