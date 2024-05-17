@@ -130,59 +130,109 @@ bool DoubleLinkedList::remove(const JCString& str)
 // Smaller letters come first hence A < B < C etc. list starts small goes large
 bool DoubleLinkedList::insert(const JCString& str)
 {
+	this->resetIteration();
 	bool success = false;
+	int counter = 0;
 
 	// Case where list is empty
 	if (this->count == 0)
 	{
-		// Place on top of list and return true
 		this->initHeadNode(str);
 
+		cout << "fist item" << endl;
 		success = true;
 		
 	}// Case where this is only one item in list
 	else if(this->count == 1)
 	{
+		cout << "second item" << endl;
 		
-		this->it = this->head;
-		
-		if (this->it->data == str)//using JCString to string compare operator
+		if (this->head->data == str.c_str())//using JCString to string compare operator
 		{
 			// Already in list, return false
+			cout << " Already in the list" << endl;
 			success = false;
 		}
-		else if (this->it->data > str)// Arg String comes before 
+		else if (this->head->data > str )// Arg String comes before 
 		{
 			//string arg becomes new head
 			// call push back to handle it and increment this->count
+			cout << "top of the stack, 2 now" << endl;
+
 			success = this->push_back(str);
 		}
-		else if (this->it->data < str) // Arg String comes after
+		else if (this->it->data < str) // Arg String goes under first
 		{
-			// Create new node with string arg
-			JCNode* newNode = new JCNode(str);
+			this->pop_back(str);
 
-			// Place node behind the head
-			this->it->prev = newNode; // point prev to  this node
-			newNode->next = this->head; // newNode next points to the head
-			newNode->prev = nullptr; // only two items in list
-
-			// New node is bottom of list
-			this->tail = newNode;
-
-			// Increment list
-			++this->count;
-
-			// Reset iter
-			this->resetIteration();
 			success = true;
 		}
-
 	}
-	
-	return success;
-}
+	else if(this->count > 1)
+	{ 
+		if( this->head->data > str)
+		{
+			success = this->push_back(str);
+		}
+		else
+		{
+			this->it = this->head;//start from head
 
+			// goes from head to prev to prev until nullptr
+			while ((!success) && (counter <= this->count))
+			{
+				if (this->it->data == str.c_str())//using JCString to string compare operator
+				{
+					// Already in list, return false
+					cout << "in the list" << endl;
+					counter = this->count + 1; // Break loop
+					success = false;
+
+				}
+				else if (this->it->data > str)  // Arg String comes before
+				{
+					cout << "insert " << str << " before " << this->it->data.c_str() << endl;
+
+					this->insertBefore(this->it, str);//increments and adds to the list
+
+					success = true;
+				}
+				else if (this->it->prev == nullptr)//reached the bottom
+				{
+					this->pop_back(str);
+					cout << "reached bottom need to pop back! ooh, " << str.c_str() << " on bottom " << endl;
+					success = true;
+				}
+				else
+				{
+					this->it = this->it->prev;// move the ptr backwards and cont
+					++counter;
+				}
+			}
+		}
+	}
+
+	this->resetIteration();
+	//this->testValues();
+
+	return success;
+	
+}
+JCString DoubleLinkedList::next() const
+{
+	return 0;
+}
+void DoubleLinkedList::testValues() const
+{
+	int counter = 1;
+	this->it = this->head;
+	while (this->it)
+	{
+		cout << "Number " << counter << " is " << this->it->data.c_str() << " of " << this->count << endl;
+		this->it = this->it->prev;
+		++counter;
+	}
+}
 void DoubleLinkedList::initHeadNode(const JCString& str)
 {
 	JCNode* newNode =  new JCNode(str); 
@@ -194,7 +244,35 @@ void DoubleLinkedList::initHeadNode(const JCString& str)
 
 }
 
-//	Free standing helper function
+// newNode is smaller so comes before the iter node
+ void DoubleLinkedList::insertBefore(JCNode* iter, const JCString& str)
+{
+	// Place before the next node 
+	JCNode* newNode =  new JCNode(str); 
+	newNode->prev = iter; //point prev to iter
+	newNode->next = iter->next;//point next to iter's next
+	iter->next->prev = newNode;
+	iter->next = newNode; // point iters next to this node
+
+	++this->count;
+
+}
+// assumes at least one thing on the top
+ //places on the bottom 
+void DoubleLinkedList::pop_back(const JCString& str)
+{
+	JCNode* newNode =  new JCNode(str); 
+	this->tail->prev = newNode;
+	newNode->next = this->tail;
+	newNode->prev = nullptr;
+	//change tail ptr
+	this->tail = newNode;
+
+	++this->count;
+
+}
+
+//	Free standing helper function to find an item in list using a string
 JCNode* seeker(const char* str, const DoubleLinkedList* dll)
 {	
 	char* checkString = nullptr; //looking for this string
