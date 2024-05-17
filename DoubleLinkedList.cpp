@@ -120,7 +120,6 @@ bool DoubleLinkedList::insert(const JCString& str)
 {
 	this->resetIteration();
 	bool success = false;
-	int counter = 0;
 
 	// Case where list is empty
 	if (this->count == 0)
@@ -138,15 +137,12 @@ bool DoubleLinkedList::insert(const JCString& str)
 		if (this->head->data == str.c_str())//using JCString to string compare operator
 		{
 			// Already in list, return false
-			cout << " Already in the list" << endl;
 			success = false;
 		}
 		else if (this->head->data > str )// Arg String comes before 
 		{
 			//string arg becomes new head
 			// call push back to handle it and increment this->count
-			cout << "top of the stack, 2 now" << endl;
-
 			success = this->push_back(str);
 		}
 		else if (this->it->data < str) // Arg String goes under first
@@ -156,46 +152,49 @@ bool DoubleLinkedList::insert(const JCString& str)
 			success = true;
 		}
 	}
-	else if(this->count > 1)
-	{ 
-		if( this->head->data > str)
+	else if(this->count > 1) // Case where there are already many entries
+	{	// Fist check the head
+
+		JCString listString = this->next();//head node
+
+		if (listString == str.c_str())//using JCString to string compare operator
+		{
+			return false;
+		}
+		else if( listString > str)
 		{
 			success = this->push_back(str);
 		}
 		else
-		{
-			this->it = this->head;//start from head
+		{	//advance to next entrie
 
-			// goes from head to prev to prev until nullptr
-			while ((!success) && (counter <= this->count))
+			do
 			{
-				if (this->it->data == str.c_str())//using JCString to string compare operator
+				listString = this->next();
+
+				if (listString == str.c_str())//using JCString to string compare operator
 				{
 					// Already in list, return false
 					cout << "in the list" << endl;
-					counter = this->count + 1; // Break loop
-					success = false;
-
+					return false;
+					// RETURN FALSE
 				}
-				else if (this->it->data > str)  // Arg String comes before
+				else if (listString > str)  // Arg String comes before
 				{
-					cout << "insert " << str << " before " << this->it->data.c_str() << endl;
+					//cout << "insert " << str << " before " << this->it->data.c_str() << endl;
 
 					this->insertBefore(this->it, str);//increments and adds to the list
+					success = true;
+					break;
+				}
+			} while (this->hasMore());
 
-					success = true;
-				}
-				else if (this->it->prev == nullptr)//reached the bottom
-				{
-					this->pop_back(str);
-					cout << "reached bottom need to pop back! ooh, " << str.c_str() << " on bottom " << endl;
-					success = true;
-				}
-				else
-				{
-					this->it = this->it->prev;// move the ptr backwards and cont
-					++counter;
-				}
+			//reached the bottom without success place on bottom
+			if (success == false)
+			{
+				this->pop_back(str);
+				success = true;
+
 			}
 		}
 	}

@@ -19,13 +19,6 @@ int main()
 	JCString jcstr8("cat");
 	JCString jcstr9("dog");
 	JCString jcstr10("emu");
-	const char* test_str = "World";
-	const char* test_str2 = "cat";
-	bool test = false;
-	test = jcstr2 == test_str;// should be true
-	cout << "result of test is " << test << endl; 
-	test = jcstr2 == test_str2;
-	cout << "result of test is " << test << endl;// should be false
 	dll.insert(jcstr0);
 	dll.insert(jcstr1);
 	dll.insert(jcstr2);
