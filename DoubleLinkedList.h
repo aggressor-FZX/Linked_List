@@ -23,6 +23,7 @@ public:
 	void pop_back(const JCString& str);
 	bool insert(const JCString& str);
 	bool remove(const JCString& str);
+	bool remove(const DoubleLinkedList& dll);
 	int getCount() const;
 	void testValues()const;
 	DoubleLinkedList operator=(const DoubleLinkedList& dll); // Assignment assignment

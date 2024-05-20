@@ -27,10 +27,13 @@ DoubleLinkedList::DoubleLinkedList(const DoubleLinkedList& dll)
 // Assignment assignment
 DoubleLinkedList DoubleLinkedList::operator=(const DoubleLinkedList& dll)
 {
-	this->head = dll.head;
-	this->tail = dll.tail;
-	this->count = dll.count;
-	this->it = dll.it;
+	dll.resetIteration();
+	while (dll.hasMore())
+	{
+		//next moves to prev to prev
+		//JCString copy constructor handles memory allocation 
+		this->insert(dll.next());
+	}
 	return *this;
 }
 
@@ -113,10 +116,6 @@ bool DoubleLinkedList::push_back(const JCString& str)
 	return false;
 }
 
-bool DoubleLinkedList::remove(const JCString& str)
-{
-	return false;
-}
 
 // Smaller letters come first hence A < B < C etc. list starts small goes large
 bool DoubleLinkedList::insert(const JCString& str)
@@ -182,7 +181,9 @@ bool DoubleLinkedList::insert(const JCString& str)
 				}
 				else if (listString > str)  // Arg String comes before
 				{
-					this->insertBefore(this->it, str);//increments and adds to the list
+					// Insert behind prev from iterator since we advance after defining listString
+					this->insertBefore(this->it->next, str);//increments and adds to the list
+
 					success = true;
 					this->it = nullptr;//end search
 				}
@@ -268,27 +269,83 @@ void DoubleLinkedList::pop_back(const JCString& str)
 	++this->count;
 
 }
+// If any of the strings were removed return true otherwise false
+bool DoubleLinkedList::remove(const DoubleLinkedList& dll)
+{
+	bool success = false;
+	int checkCount = this->count;
+	
+	dll.resetIteration();
+
+	while (dll.hasMore())
+	{
+		this->remove(dll.next());
+	}
+	if (checkCount > this->count)
+	{
+		success = true;
+	}
+	return success;
+}
+
+bool DoubleLinkedList::remove(const JCString& str)
+{
+	cout << "removing " << str << endl;
+	bool success = false;
+	JCNode* key = seeker(str.c_str(), this);// Checks that it has more than one node
+	if (key != nullptr)
+	{
+		if (key == this->head)//if head is removed
+		{
+			this->head = key->prev;//remove top replace with next in line
+			key->prev->next = nullptr;// replace itself with nullptr
+		}
+		else if (key == this->tail)//if tail is removed
+		{
+			this->tail = key->next;
+			key->next->prev= nullptr;
+		}
+		else
+		{
+			key->next->prev = key->prev;
+			key->prev->next = key->next;
+		
+		}
+		--this->count;
+
+		delete key;
+	}
+	
+	return success;
+}
+
 
 //	Free standing helper function to find an item in list using a string
 JCNode* seeker(const char* str, const DoubleLinkedList* dll)
-{	
-	char* checkString = nullptr; //looking for this string
+{
+	bool notFound = true;
+	JCNode* result = nullptr;
 
-	dll->it = dll->head; // start at the head node
+	if (dll->getCount() != 0)
+	{
+		char* checkString = nullptr; //looking for this string
 
-	while (dll->it != nullptr) //go until we prev ptr is null
-	{	
-		if(dll->it->data == str) //if we find it 
-		{
-			return dll->it; //return it ptr
-		}
-		else 
-		{//move backwards
-			dll->it = dll->it->prev;
+		dll->it = dll->head; // start at the head node
+
+		while (notFound && dll->it != nullptr) //go until we prev ptr is null
+		{	
+			if(dll->it->data == str) //if we find it 
+			{
+				result =  dll->it; //return it ptr
+				notFound = false;
+			}
+			else 
+			{//move down towards tail
+				dll->it = dll->it->prev;
+			}
 		}
 	}
-
-	return nullptr; //didn't find it return null
+	return result; 
 }
 bool isLargerAlpha(const JCString& listString, const JCString& newString)
 {

@@ -56,7 +56,7 @@ int main()
 //	thirdDll.insert(jcstr4);
 //	thirdDll.insert(jcstr5);
 //	thirdDll.insert(jcstr6);
-//	secondDll.remove(thirdDll); // Del
+//	secondDll.remove(thirdDll);
 
 	secondDll.testValues();
 
