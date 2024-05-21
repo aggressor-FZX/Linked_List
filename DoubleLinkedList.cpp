@@ -8,7 +8,6 @@ JCNode* seeker(const char* str, const DoubleLinkedList* dll);
 
 DoubleLinkedList::DoubleLinkedList()
 {
-	cout << "in constructor" << endl;
 	this->head = nullptr;
 	this->tail = nullptr;
 	this->it = nullptr;
@@ -18,21 +17,30 @@ DoubleLinkedList::DoubleLinkedList()
 // copy constructor
 DoubleLinkedList::DoubleLinkedList(const DoubleLinkedList& dll)
 {
-	this->head = dll.head;
-	this->tail = dll.tail;
-	this->count = dll.count;
-	this->it = dll.it;
+	dll.resetIteration();
+
+	initHeadNode(dll.next());
+
+	while (dll.hasMore())
+	{
+		//next moves to prev to prev
+		//JCString copy constructor handles memory allocation 
+		this->pop_back(dll.next());
+	}
 }
 
 // Assignment assignment
 DoubleLinkedList DoubleLinkedList::operator=(const DoubleLinkedList& dll)
 {
 	dll.resetIteration();
+
+	initHeadNode(dll.next());
+
 	while (dll.hasMore())
 	{
 		//next moves to prev to prev
 		//JCString copy constructor handles memory allocation 
-		this->insert(dll.next());
+		this->pop_back(dll.next());
 	}
 	return *this;
 }
@@ -40,14 +48,10 @@ DoubleLinkedList DoubleLinkedList::operator=(const DoubleLinkedList& dll)
 // Write out using operator
 ostream& operator<<(ostream& inputStrm, const DoubleLinkedList& dll)
 {
-	cout << " in the << operator " << endl;
-	// Changing to "current" for clarity
-	JCNode* current = dll.head;
 	// While there is a node to write out, as in not nullptr
-	while (current)
+	while (dll.hasMore())
 	{
-		inputStrm << current->data << "\n";//write out the current data
-		current = current->prev;//move to the next and try to repeat until nullptr
+		inputStrm << dll.next() << "\n";//write out the current data
 	}
 
 	return inputStrm;//return input stream for chaining
@@ -56,8 +60,6 @@ ostream& operator<<(ostream& inputStrm, const DoubleLinkedList& dll)
 // destructor
 DoubleLinkedList::~DoubleLinkedList()
 {
-	cout << "in linked list destructor" << endl;
-
 	// Changing to "current" for clarity
 	JCNode* current = this->head; // creat pointer to head
 	JCNode* holdNext = nullptr; // pointer to hold memory address 
@@ -120,17 +122,17 @@ bool DoubleLinkedList::push_back(const JCString& str)
 // Smaller letters come first hence A < B < C etc. list starts small goes large
 bool DoubleLinkedList::insert(const JCString& str)
 {
-	this->resetIteration();
+	this->resetIteration();//Start from head
 	bool success = false;
 
-	// Case where list is empty
+	// CASE WHERE LIST IS EMPTY
 	if (this->count == 0)
 	{
-		this->initHeadNode(str);
+		this->initHeadNode(str);// Place on top
 		success = true;
 		
 	}
-	// Case where this is only one item in list
+	// CASE WHERE THIS IS ONLY ONE ITEM IN LIST
 	else if(this->count == 1)
 	{
 		if (this->head->data == str.c_str())//using JCString to string compare operator
@@ -148,13 +150,14 @@ bool DoubleLinkedList::insert(const JCString& str)
 			else 
 			{
 				this->pop_back(str);
-				success = true;
+				success = true;// added item return true
 			}
 		}
 	}
-	// Case where there are already many entries
+	// CASE WHERE THERE ARE ALREADY MANY ENTRIES
 	else if(this->count > 1) 
-	{	// Fist check the head which must be handled separately
+	{	
+		// FIST CHECK THE HEAD WHICH MUST BE HANDLED SEPARATELY
 
 		JCString listString = this->next();//examine head node
 
@@ -167,25 +170,32 @@ bool DoubleLinkedList::insert(const JCString& str)
 			success = this->push_back(str);//string becomes new head node
 		}
 		else
-		{	//advance to next entry
+		{	// ADVANCE TO NEXT ENTRIES
 			do
 			{
+				JCNode* listNode = this->it;
 				listString = this->next();
 
 				if (listString == str.c_str())// use JCString to string compare operator
 				{
 					// Already in list, return false
-					cout << "in the list" << endl;
 					success = true;
 					this->it = nullptr;// end search
 				}
-				else if (listString > str)  // Arg String comes before
+				else if (listString > str)  // If arg String comes before
 				{
-					// Insert behind prev from iterator since we advance after defining listString
-					this->insertBefore(this->it->next, str);//increments and adds to the list
-
+					if (listNode != nullptr)// Check for dereference nullptr
+					{
+						// Insert behind prev from iterator since we advanced iter after next() call
+						
+						this->insertBefore(listNode, str);// increments and adds to the list
+					}
+					else {
+						this->testValues();
+					}
+					// Return true and end search
 					success = true;
-					this->it = nullptr;//end search
+					this->it = nullptr;// Ends loop
 				}
 			} while (this->hasMore());
 
@@ -222,12 +232,11 @@ JCString DoubleLinkedList::next() const
 }
 void DoubleLinkedList::testValues() const
 {
+	this->resetIteration();
 	int counter = 1;
-	this->it = this->head;
-	while (this->it)
+	while (this->hasMore())
 	{
-		cout << "Number " << counter << " is " << this->it->data.c_str() << " of " << this->count << endl;
-		this->it = this->it->prev;
+		cout << "Number " << counter << " is " << this->next() << " of " << this->count << endl;
 		++counter;
 	}
 }
@@ -290,7 +299,6 @@ bool DoubleLinkedList::remove(const DoubleLinkedList& dll)
 
 bool DoubleLinkedList::remove(const JCString& str)
 {
-	cout << "removing " << str << endl;
 	bool success = false;
 	JCNode* key = seeker(str.c_str(), this);// Checks that it has more than one node
 	if (key != nullptr)
