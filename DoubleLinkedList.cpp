@@ -1,9 +1,22 @@
+////
+// Name: Jeff Calderon
+// Class Name: CS131
+// Section:  33616
+// Program 3 DoubleLinkedList
+// Description: Double Linked List implementation 
+// implements the linked list. Uses JCNode as 
+// nodes. Each holds a JCString data type. List
+// alphabetizes as it inserts values list 
+// ignores strings that are already in the list.
+// Insert has insertFirst and alphaPlacer as helper
+// functions. insertBefore member function places 
+// string prev to argument string in the list
+////
 #include "DoubleLinkedList.h"
 #include <iostream>
 using std::cout;
 using std::endl;
-//Helper functions
-bool isLargerAlpha(const JCString& listString, const JCString& newString);
+//Helper Functions
 JCNode* seeker(const char* str, const DoubleLinkedList* dll);
 
 DoubleLinkedList::DoubleLinkedList()
@@ -46,15 +59,18 @@ DoubleLinkedList DoubleLinkedList::operator=(const DoubleLinkedList& dll)
 }
 
 // Write out using operator
-ostream& operator<<(ostream& inputStrm, const DoubleLinkedList& dll)
+ostream& operator<<(ostream& outputStrm, const DoubleLinkedList& dll)
 {
+	dll.resetIteration();
 	// While there is a node to write out, as in not nullptr
 	while (dll.hasMore())
 	{
-		inputStrm << dll.next() << "\n";//write out the current data
+		JCString str = JCString(dll.next());//write out the current data 
+		outputStrm << str << " ";
+
 	}
 
-	return inputStrm;//return input stream for chaining
+	return outputStrm;//return input stream for chaining
 }
 
 // destructor
@@ -102,10 +118,10 @@ bool DoubleLinkedList::push_back(const JCString& str)
 		JCNode* newNode;
 		newNode = new JCNode(str);
 
-		this->head->next = newNode; //old head's 'next' points to new head node
-		newNode->prev = this->head; // New head node's previous points to old head node;A
-		newNode->next = nullptr; // New head node's next points to nullptr
-		this->head = newNode;//place on top of stack
+		this->head->next = newNode;// fix old head next to new node
+		newNode->prev = this->head; // New head node's prev points to old head node
+		newNode->next = nullptr; // Head node next is always nullptr
+		this->head = newNode;// list head ptr to newNode 
 		 
 		++this->count;
 
@@ -120,6 +136,7 @@ bool DoubleLinkedList::push_back(const JCString& str)
 
 
 // Smaller letters come first hence A < B < C etc. list starts small goes large
+// If the word is in list already it ignores, regardless of capitalization
 bool DoubleLinkedList::insert(const JCString& str)
 {
 	this->resetIteration();//Start from head
@@ -130,86 +147,83 @@ bool DoubleLinkedList::insert(const JCString& str)
 	{
 		this->initHeadNode(str);// Place on top
 		success = true;
-		
+
 	}
 	// CASE WHERE THIS IS ONLY ONE ITEM IN LIST
-	else if(this->count == 1)
+	else if (this->count == 1)
 	{
-		if (this->head->data == str.c_str())//using JCString to string compare operator
-		{
-			// Already in list, return false
-			 return false;
-		}
-		else
-		{
-			success  = isLargerAlpha(this->head->data, str);
-			if (success)
-			{
-				this->push_back(str);
-			}
-			else 
-			{
-				this->pop_back(str);
-				success = true;// added item return true
-			}
-		}
+		//checks if is in already and places
+		success = insertFirsts(*this, str);
 	}
 	// CASE WHERE THERE ARE ALREADY MANY ENTRIES
-	else if(this->count > 1) 
-	{	
+	else if (this->count > 1)
+	{
 		// FIST CHECK THE HEAD WHICH MUST BE HANDLED SEPARATELY
-
 		JCString listString = this->next();//examine head node
 
 		if (listString == str.c_str())//using JCString to string compare operator
 		{
 			return false;
 		}
-		else if( listString > str)
+		else if (listString > str)
 		{
 			success = this->push_back(str);//string becomes new head node
 		}
 		else
 		{	// ADVANCE TO NEXT ENTRIES
-			do
-			{
-				JCNode* listNode = this->it;
-				listString = this->next();
+			//loop to find next highest entries
+			success = alphaPlacer(*this, str);
+		}
 
-				if (listString == str.c_str())// use JCString to string compare operator
-				{
-					// Already in list, return false
-					success = true;
-					this->it = nullptr;// end search
-				}
-				else if (listString > str)  // If arg String comes before
-				{
-					if (listNode != nullptr)// Check for dereference nullptr
-					{
-						// Insert behind prev from iterator since we advanced iter after next() call
-						
-						this->insertBefore(listNode, str);// increments and adds to the list
-					}
-					else {
-						this->testValues();
-					}
-					// Return true and end search
-					success = true;
-					this->it = nullptr;// Ends loop
-				}
-			} while (this->hasMore());
+		this->resetIteration();
+	}
+	return success;
+}
 
-			//reached the bottom without success place on bottom
-			if (success == false)
+//Goes from head to prev to tail. inserts before next highest string in alpha
+bool alphaPlacer(DoubleLinkedList& dll, const JCString& str)
+{
+	bool success = false;
+
+	do
+	{
+		// Record the node for placement
+		JCNode* listNode = dll.it;
+		// Extract string and advance the pointer
+		JCString listString = dll.next();
+		
+		// JCString == string compares
+		if (listString == str.c_str())
+		{
+			// Already in list, return false
+			success = true;
+			dll.it = nullptr;// end search
+		}
+		else if (listString > str)  // If arg String comes before
+		{
+			if (listNode != nullptr)// Check for dereference nullptr
 			{
-				this->pop_back(str);
+				// increments and adds to the list
+				dll.insertBefore(listNode, str);
 				success = true;
 			}
+			else {
+				cout << "ERROR" << endl;
+			}
+
+			// Return true and end search
+			dll.it = nullptr;// Ends loop
 		}
+
+	} while (dll.hasMore());
+	//reached the bottom 
+	if (success==false)
+	{
+		//places on the bottom
+		dll.pop_back(str);
+		success = true;
 	}
 
-	this->resetIteration();
-	//this->testValues();
 	return success;
 }
 
@@ -230,16 +244,17 @@ JCString DoubleLinkedList::next() const
 
 	return itString;
 }
+
 void DoubleLinkedList::testValues() const
 {
 	this->resetIteration();
 	int counter = 1;
 	while (this->hasMore())
 	{
-		cout << "Number " << counter << " is " << this->next() << " of " << this->count << endl;
 		++counter;
 	}
 }
+
 void DoubleLinkedList::initHeadNode(const JCString& str)
 {
 	JCNode* newNode =  new JCNode(str); 
@@ -247,8 +262,7 @@ void DoubleLinkedList::initHeadNode(const JCString& str)
 	this->tail = newNode;
 	newNode->next = nullptr;
 	newNode->prev = nullptr;
-	++this->count;
-
+	++this->count; 
 }
 
 // newNode is smaller so comes before the iter node
@@ -264,9 +278,10 @@ void DoubleLinkedList::initHeadNode(const JCString& str)
 	++this->count;
 
 }
+
 // assumes at least one thing on the top
  //places on the bottom 
-void DoubleLinkedList::pop_back(const JCString& str)
+bool DoubleLinkedList::pop_back(const JCString& str)
 {
 	JCNode* newNode =  new JCNode(str); 
 	this->tail->prev = newNode;
@@ -277,7 +292,10 @@ void DoubleLinkedList::pop_back(const JCString& str)
 
 	++this->count;
 
+	return true;
 }
+
+//Remove a another list worth of strings
 // If any of the strings were removed return true otherwise false
 bool DoubleLinkedList::remove(const DoubleLinkedList& dll)
 {
@@ -297,16 +315,26 @@ bool DoubleLinkedList::remove(const DoubleLinkedList& dll)
 	return success;
 }
 
+//Remove a string
 bool DoubleLinkedList::remove(const JCString& str)
 {
 	bool success = false;
 	JCNode* key = seeker(str.c_str(), this);// Checks that it has more than one node
 	if (key != nullptr)
 	{
-		if (key == this->head)//if head is removed
+		if (key == this->head)//if key head is removed
 		{
-			this->head = key->prev;//remove top replace with next in line
-			key->prev->next = nullptr;// replace itself with nullptr
+			if (key->prev == nullptr)
+			{
+				this->head = nullptr;
+				this->tail = nullptr;
+				cout << "removed last entry "<< endl;
+			}
+			else
+			{
+				this->head = key->prev;//remove top replace with next in line
+				key->prev->next = nullptr;// replace itself with nullptrS
+			}
 		}
 		else if (key == this->tail)//if tail is removed
 		{
@@ -320,7 +348,6 @@ bool DoubleLinkedList::remove(const JCString& str)
 		
 		}
 		--this->count;
-
 		delete key;
 	}
 	
@@ -331,8 +358,8 @@ bool DoubleLinkedList::remove(const JCString& str)
 //	Free standing helper function to find an item in list using a string
 JCNode* seeker(const char* str, const DoubleLinkedList* dll)
 {
-	bool notFound = true;
-	JCNode* result = nullptr;
+	bool found = false;
+	JCNode* foundNode = nullptr;
 
 	if (dll->getCount() != 0)
 	{
@@ -340,36 +367,43 @@ JCNode* seeker(const char* str, const DoubleLinkedList* dll)
 
 		dll->it = dll->head; // start at the head node
 
-		while (notFound && dll->it != nullptr) //go until we prev ptr is null
+		while (!found && dll->it != nullptr) //go until we prev ptr is null
 		{	
 			if(dll->it->data == str) //if we find it 
 			{
-				result =  dll->it; //return it ptr
-				notFound = false;
+				foundNode =  dll->it; //return it ptr
+				found = true;
 			}
 			else 
-			{//move down towards tail
+			{
+				//move down towards tail
 				dll->it = dll->it->prev;
 			}
 		}
 	}
-	return result; 
+	return foundNode; 
 }
-bool isLargerAlpha(const JCString& listString, const JCString& newString)
+
+bool insertFirsts(DoubleLinkedList& dll, const JCString& str)
 {
-	bool comesBefore = false;
-	
-	if(listString > newString )// Arg String comes before 
+	bool result = false;
+	//check for repeats
+	if (dll.head->data != str.c_str())
 	{
-		//string arg becomes new head
-		comesBefore = true;
-		// call push back to handle it and increment this->count
-	}
-	else if (listString < newString) // Arg String goes under first
-	{
-		comesBefore =false;
+
+		if (dll.head->data > str)// Arg String comes before 
+		{
+			dll.push_back(str);
+			result = true;// added item return true
+
+		}
+		else if (dll.head->data < str) // Arg String goes under first
+		{
+			dll.pop_back(str);
+			result = true;// added item return true
+		}
 	}
 
-	return comesBefore;
+	return result;
 
 }

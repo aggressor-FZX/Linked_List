@@ -1,5 +1,12 @@
+////
+// Name: Jeff Calderon
+// Class Name: CS131
+// Section:  33616
+// Program 3 DoubleLinkedList
+// Description: JCNode implementation 
+// 
+////
 #include "JCNode.h"
-
 
 JCNode::JCNode()
 {
